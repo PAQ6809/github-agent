@@ -1,0 +1,10 @@
+name: Feature
+description: 提出新功能
+labels: [enhancement]
+body:
+  - type: textarea
+    id: summary
+    attributes: { label: 說明 }
+  - type: input
+    id: motivation
+    attributes: { label: 動機/ 使用情境 }
