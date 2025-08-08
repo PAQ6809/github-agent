@@ -1,0 +1,13 @@
+name: Bug
+description: 回報問題
+labels: [bug]
+body:
+  - type: textarea
+    id: steps
+    attributes: { label: 重現步驟 }
+  - type: input
+    id: expect
+    attributes: { label: 預期行為 }
+  - type: input
+    id: actual
+    attributes: { label: 實際行為 }
