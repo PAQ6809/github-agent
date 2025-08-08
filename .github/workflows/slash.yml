@@ -1,0 +1,46 @@
+# .github/workflows/slash.yml
+name: Slash Commands
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+jobs:
+  slash:
+    if: contains(github.event.comment.body, '/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parse slash
+        id: parse
+        run: |
+          body="${{ github.event.comment.body }}"
+          cmd=$(echo "$body" | awk '{print $1}')
+          payload=$(echo "$body" | sed 's|^/[^ ]\+||')
+          echo "cmd=$cmd" >> $GITHUB_OUTPUT
+          echo "payload<<EOF" >> $GITHUB_OUTPUT
+          echo "$payload" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: /test
+        if: steps.parse.outputs.cmd == '/test'
+        run: |
+          echo "Re-run tests"
+
+      - name: /docs
+        if: steps.parse.outputs.cmd == '/docs'
+        run: make docs
+
+      - name: /deploy-staging
+        if: steps.parse.outputs.cmd == '/deploy-staging'
+        run: make deploy-staging
+
+      - name: /agent
+        if: steps.parse.outputs.cmd == '/agent'
+        run: |
+          jq -e . >/dev/null 2>&1 <<<'${{ steps.parse.outputs.payload }}' || { echo "Invalid JSON"; exit 1; }
+          echo "AGENT_PAYLOAD=${{ steps.parse.outputs.payload }}" >> $GITHUB_ENV
+          # 這裡可改為呼叫外部 Agent API
+          echo "Received AGENT_PAYLOAD"
